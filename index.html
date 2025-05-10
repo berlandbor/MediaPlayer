@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎧 Медиаплеер</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <h1>🎵 Медиаплеер</h1>
+
+  <div class="player">
+    <div id="station-name">Нет станции</div>
+
+    <div id="media-container">
+      <audio id="media-player" controls></audio>
+    </div>
+
+    <div class="controls">
+      <button onclick="prevStation()">◀ Пред.</button>
+      <button onclick="togglePlay()">⏯ Играть/Пауза</button>
+      <button onclick="nextStation()">След. ▶</button>
+    </div>
+
+    <div class="playlist">
+      <h3>📻 Плейлист</h3>
+      <div id="station-list">Нет станций</div>
+    </div>
+
+    <div class="file-controls">
+      <input type="file" id="autoFileInput" accept=".txt,.m3u" style="display:none">
+      <button onclick="document.getElementById('autoFileInput').click()">📂 Загрузить плейлист</button>
+      <button onclick="clearAutoload()">🗑 Очистить базу</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
