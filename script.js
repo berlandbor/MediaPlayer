@@ -21,7 +21,7 @@ window.onload = () => {
       console.warn("Ошибка чтения из localStorage:", e);
     }
   }
-  fileInput.click(); // запросить файл при первом запуске
+  fileInput.click();
 };
 
 fileInput.addEventListener("change", handleFile);
@@ -33,24 +33,32 @@ function handleFile(e) {
   const reader = new FileReader();
   reader.onload = function () {
     const text = reader.result;
-    console.log("Загружен файл:", file.name);
-    console.log("Содержимое:", text);
-
     const isM3U = file.name.endsWith(".m3u");
     const lines = text.split(/\r?\n/);
     let parsed = [];
 
     if (isM3U) {
-      parsed = lines
-        .filter(line => line.trim() && !line.startsWith("#"))
-        .map(url => ({ name: url.split("/").pop(), url: url.trim() }));
+      parsed = [];
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (line.startsWith("#EXTINF")) {
+          const nameMatch = line.match(/,(.+)$/);
+          const name = nameMatch ? nameMatch[1].trim() : "Без названия";
+          const url = lines[i + 1]?.trim();
+          if (url && !url.startsWith("#")) {
+            parsed.push({ name, url });
+            i++;
+          }
+        } else if (line && !line.startsWith("#") && (i === 0 || !lines[i - 1].startsWith("#EXTINF"))) {
+          const name = line.split("/").pop();
+          parsed.push({ name, url: line });
+        }
+      }
     } else {
-      parsed = lines
-        .map(line => {
-          const [name, url] = line.split(" - ");
-          return { name: name?.trim(), url: url?.trim() };
-        })
-        .filter(s => s.name && s.url);
+      parsed = lines.map(line => {
+        const [name, url] = line.split(" - ");
+        return { name: name?.trim(), url: url?.trim() };
+      }).filter(s => s.name && s.url);
     }
 
     if (parsed.length === 0) {
@@ -83,7 +91,7 @@ function loadStation(index) {
   const station = stations[currentStationIndex];
   stationName.textContent = station.name;
 
-  const isVideo = /\.(mp4|webm|m3u8)$/i.test(station.url);
+  const isVideo = /\.(mp4|webm|m3u8|mpd)$/i.test(station.url);
   const newPlayer = document.createElement(isVideo ? "video" : "audio");
   newPlayer.id = "media-player";
   newPlayer.controls = true;
